@@ -16,7 +16,7 @@ export const os = (state, ...args) => {
 
   switch (arg) {
     case '--EOL':
-      console.log(`default system End-Of-Line: ${setColor(JSON.stringify(state.eol), 'blue')}`);
+      console.log(`default system End-Of-Line: ${setColor(JSON.stringify(state.eol), 'magenta')}`);
       break;
     case '--cpus':
       const cpus = state.osState.cpus.map(cpu => {
@@ -25,17 +25,17 @@ export const os = (state, ...args) => {
           speed: `${cpu.speed / 1000} GHz`,
         }
       })
-      console.log(`Overall amount of CPUS: ${setColor(cpus.length, 'blue')}`);
+      console.log(`Overall amount of CPUS: ${setColor(cpus.length, 'magenta')}`);
       console.table(cpus);
       break;
     case '--homedir':
-      console.log(`Home directory: ${setColor(state.osState.homedir, 'blue')}`);
+      console.log(`Home directory: ${setColor(state.osState.homedir, 'magenta')}`);
       break;
     case '--username':
-      console.log(`Current system username: ${setColor(state.osState.username, 'blue')}`);
+      console.log(`Current system username: ${setColor(state.osState.username, 'magenta')}`);
       break;
     case '--architecture':
-      console.log(`CPU architecture: ${setColor(state.osState.architecture, 'blue')}`);
+      console.log(`CPU architecture: ${setColor(state.osState.architecture, 'magenta')}`);
       break;
   }
 }

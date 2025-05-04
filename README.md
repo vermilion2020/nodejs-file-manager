@@ -51,5 +51,7 @@ If username is not passed, it will be saved as Username
 ## Usage Notes
 
 Paths and file/folder name arguments may be passed directly (e.g. `path/to/file`) or with quotes (e.g. `'path/to/file'` or `"path/to/file"`).<br>
-Passing not quoted paths without quotes will be handled as an 'Invalid input' error.<br>
-When an error occurs while command executing, 'Operation error' message will be thrown.
+Passing not quoted paths without quotes will be handled as an `Invalid input` error.<br>
+When an error occurs while command executing, `Operation error` message will be thrown.<br>
+For operations with reading files, if file doesn't exist `Operation error` will be thrown.<br>
+For the case when destination file already exists in operations when a new file is added, `Operation error` will be thrown.<br>

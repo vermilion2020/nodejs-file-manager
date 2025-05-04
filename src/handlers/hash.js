@@ -15,7 +15,7 @@ export const hash = async (state, ...args) => {
   }
 
   const filePath = getResolvedPath(state, prepared[0]);
-  const rs = createReadStream(filePath);
+  const rs = createReadStream(filePath, { flags: 'r' });
   const hash = createHash('sha256');
   
   try {

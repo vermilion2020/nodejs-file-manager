@@ -1,4 +1,4 @@
-import { createReadStream, createWriteStream } from 'node:fs';
+import { createReadStream, createWriteStream, constants } from 'node:fs';
 import {
   handleInvalidInput,
   handleOperationError,
@@ -6,6 +6,7 @@ import {
   getResolvedPath,
   handleSuccessfulCompression
 } from '../utils/index.js';
+import { access } from 'node:fs/promises';
 import { pipeline } from 'node:stream';
 import { createBrotliCompress, createBrotliDecompress } from 'node:zlib';
 import { EOL } from 'node:os';
@@ -17,13 +18,19 @@ const prepare = async (state, ...args) => {
     return { sourcePath: null, rs: null, ws: null };
   }
 
-  const sourcePath = getResolvedPath(state, prepared[0]);
-  const destinationPath = getResolvedPath(state, prepared[1]);
+  try {
+    await access(prepared[0], constants.F_OK);
 
-  const rs = createReadStream(sourcePath);
-  const ws = createWriteStream(destinationPath);
-
-  return { sourcePath, rs, ws };
+    const sourcePath = getResolvedPath(state, prepared[0]);
+    const destinationPath = getResolvedPath(state, prepared[1]);
+  
+    const rs = createReadStream(sourcePath, { flags: 'r' });
+    const ws = createWriteStream(destinationPath);
+    return { sourcePath, rs, ws };
+  } catch (err) {
+    handleOperationError();
+    return { sourcePath: null, rs: null, ws: null };
+  }
 }
 
 const handleOperation = async (sourcePath, rs, ws, type) => {

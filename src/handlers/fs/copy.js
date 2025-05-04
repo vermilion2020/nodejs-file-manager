@@ -1,7 +1,7 @@
-import { createReadStream, createWriteStream } from 'node:fs';
+import { createReadStream, createWriteStream, constants } from 'node:fs';
 import { basename, join } from 'node:path';
 import { handleOperationError, handleSuccessfulCopying } from '../../utils/common.js';
-import { rm } from 'node:fs/promises';
+import { rm, access } from 'node:fs/promises';
 import {
   handleInvalidInput,
   getResolvedPath,
@@ -12,28 +12,36 @@ const copy = async (state, source, destination, type) => {
   const filePath = getResolvedPath(state, source);
   const newDir = getResolvedPath(state, destination);
   const newPath = join(newDir, basename(filePath));
+  try {
+    await access(filePath, constants.F_OK);
+    return await new Promise((resolve, reject) => {
+      const rs = createReadStream(filePath, { flags: 'r' });
+      const ws = createWriteStream(newPath, { flags: 'wx' });
 
-  const rs = createReadStream(filePath);
-  const ws = createWriteStream(newPath);
+      rs.pipe(ws);
 
-  rs.pipe(ws);
+      rs.on('error', () => {
+        reject({ filePath: null });
+      });
 
-  rs.on('error', () => {
-    handleOperationError();
-  });
+      ws.on('error', () => {
+        reject({ filePath: null });
+      });
 
-  ws.on('error', () => {
-    handleOperationError();
-  });
 
-  if (type === 'copy') {
-    ws.on('finish', () => {
-      handleSuccessfulCopying('copied', basename(filePath), newDir);
-      process.stdout.write(state.eol);
+      ws.on('finish', () => {
+        if (type === 'copy') {
+          handleSuccessfulCopying('copied', basename(filePath), newDir);
+          process.stdout.write(state.eol);
+        }
+        resolve({ filePath, newDir });
+      });
     });
   }
-
-  return { filePath, newDir };
+  catch (err) {
+    handleOperationError();
+    return { filePath: null };
+  }
 }
 
 export const cp = async (state, ...args) => {
@@ -43,7 +51,7 @@ export const cp = async (state, ...args) => {
     return;
   }
 
-  copy(state, prepared[0], prepared[1], 'copy');
+  await copy(state, prepared[0], prepared[1], 'copy');
 }
 
 export const mv = async (state, ...args) => {
@@ -54,6 +62,7 @@ export const mv = async (state, ...args) => {
   }
 
   const { filePath, newDir } = await copy(state, prepared[0], prepared[1], 'move');
+  if (!filePath) return;
 
   try {
     await rm(filePath);
