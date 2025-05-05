@@ -11,7 +11,7 @@ import { pipeline } from 'node:stream';
 import { createBrotliCompress, createBrotliDecompress } from 'node:zlib';
 import { EOL } from 'node:os';
 
-const prepare = async (state, ...args) => {
+const prepare = async (state, args) => {
   const prepared = prepareArgs(args);
   if (prepared.length !== 2 || !prepared[0] || !prepared[1]) {
     handleInvalidInput();
@@ -55,13 +55,13 @@ const handleOperation = async (sourcePath, rs, ws, type) => {
   
 
 export const compress = async (state, ...args) => {
-  const { sourcePath, rs, ws } = await prepare(state, ...args);
+  const { sourcePath, rs, ws } = await prepare(state, args);
   if (!sourcePath) return;
   await handleOperation(sourcePath, rs, ws, 'compress');
 }
 
 export const decompress = async (state, ...args) => {
-  const { sourcePath, rs, ws } = await prepare(state, ...args);
+  const { sourcePath, rs, ws } = await prepare(state, args);
   if (!sourcePath) return;
   await handleOperation(sourcePath, rs, ws, 'decompress');
 }

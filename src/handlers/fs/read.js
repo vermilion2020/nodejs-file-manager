@@ -43,16 +43,16 @@ export const cat = async (state, ...args) => {
     }
     const rs = createReadStream(filePath, 'utf-8');
 
-    await new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       rs.pipe(process.stdout);
       
-      rs.on('finish', () => {
+      rs.on('close', () => {
         process.stdout.write(state.eol);
-        return resolve();
+        resolve();
       });
 
       rs.on('error', () => {
-        return reject();
+        reject();
       });
     });
   } catch (error) {
